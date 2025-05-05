@@ -74,14 +74,12 @@ export class User {
   })
   isAdmin: boolean;
 
-  @CreateDateColumn()
-  @Column({
+  @CreateDateColumn({
     comment: '创建时间',
   })
   createDate: Date;
 
-  @UpdateDateColumn()
-  @Column({
+  @UpdateDateColumn({
     comment: '更新时间',
   })
   updateDate: Date;
