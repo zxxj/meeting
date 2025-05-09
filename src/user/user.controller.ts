@@ -7,6 +7,7 @@ import {
   Query,
   HttpException,
   HttpStatus,
+  UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { RegisterUserDto } from './dto/register-user.dto';
@@ -27,15 +28,16 @@ export class UserController {
   // 注册
   @Post('register')
   register(@Body() registerBody: RegisterUserDto) {
-    console.log(registerBody);
     return this.userService.register(registerBody);
   }
 
   // 用户端登录
   @Post('login')
   async userLogin(@Body() userLoginDto: LoginUserDto) {
+    // 拿到vo对象
     const vo = await this.userService.login(userLoginDto, false);
 
+    // 生成accesstoken和refreshtoken
     vo.accessToken = this.jwtService.sign(
       {
         userId: vo.userInfo.id,
@@ -63,6 +65,8 @@ export class UserController {
         expiresIn: this.configService.get('jwt_refresh_token_expires_time'),
       },
     );
+
+    // 返回vo对象
     return vo;
   }
 

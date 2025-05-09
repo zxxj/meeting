@@ -46,6 +46,7 @@ export class UserService {
     //   throw new HttpException('验证码不正确', HttpStatus.BAD_REQUEST);
     // }
 
+    // 根据注册的用户名现在数据库中查一遍,看是否有相同的用户名,如果存在则注册失败
     const foundUser = await this.userRepository.findOneBy({
       username: user.username,
     });
@@ -54,6 +55,7 @@ export class UserService {
       throw new HttpException('用户已存在', HttpStatus.BAD_REQUEST);
     }
 
+    // 创建新用户
     const newUser = new User();
     newUser.username = user.username;
     newUser.nickName = user.nickname;
@@ -70,6 +72,7 @@ export class UserService {
 
   // 登录
   async login(loginUserDto: LoginUserDto, isAdmin: boolean) {
+    // 现根据username和isAdmins在数据库中查一下,用户名如果找不到则提示用户不存在,isAdmin是代表查找user表中的isAdmin,false代表用户端,true代表管理端
     const user = await this.userRepository.findOne({
       where: {
         username: loginUserDto.username,
@@ -86,6 +89,7 @@ export class UserService {
       throw new HttpException('密码输入错误!', HttpStatus.BAD_REQUEST);
     }
 
+    // 数据库中存在当前用户,密码也输入正确后,返回vo对象
     const vo = new LoginUserVo();
     vo.userInfo = {
       id: user.id,
