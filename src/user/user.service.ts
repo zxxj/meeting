@@ -15,6 +15,8 @@ import { Role } from './entities/role.entity';
 import { Permission } from './entities/permission.entity';
 import { LoginUserDto } from './dto/login-user-dto';
 import { LoginUserVo } from './vo/login-user.vo';
+import { UpdatePasswordDto } from './dto/update-password.dot';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -142,6 +144,69 @@ export class UserService {
     };
 
     return vo;
+  }
+
+  // 根据用户id获取用户信息
+  async findInfoById(userId: number) {
+    const info = this.userRepository.findOne({
+      where: {
+        id: userId,
+      },
+    });
+
+    return info;
+  }
+
+  // 修改密码
+  async updatePassword(userId: number, passwordDto: UpdatePasswordDto) {
+    const user: any = await this.userRepository.findOneBy({
+      id: userId,
+    });
+
+    console.log(user);
+    user.password = md5(passwordDto.password);
+
+    console.log(user.password);
+
+    console.log(user);
+    try {
+      await this.userRepository.save(user);
+      return '密码修改成功!';
+    } catch (error) {
+      throw new HttpException('密码修改失败!', HttpStatus.BAD_REQUEST);
+    }
+  }
+
+  // 更新用户信息
+  async updateUser(userId: number, updateUserDto: UpdateUserDto) {
+    console.log(userId);
+    const user: any = await this.userRepository.findOneBy({
+      id: userId,
+    });
+
+    if (updateUserDto.avatar) {
+      user.avatar = updateUserDto.avatar;
+    }
+
+    if (updateUserDto.nickName) {
+      user.nickName = updateUserDto.nickName;
+    }
+
+    if (updateUserDto.phoneNumber) {
+      user.phoneNumber = updateUserDto.phoneNumber;
+    }
+
+    if (updateUserDto.username) {
+      user.username = updateUserDto.username;
+    }
+
+    try {
+      this.userRepository.save(user);
+      return '用户信息修改成功!';
+    } catch (error) {
+      this.logger.debug(error, UserService);
+      return '用户信息修改失败!';
+    }
   }
 
   // 初始化数据

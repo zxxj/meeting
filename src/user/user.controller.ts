@@ -7,13 +7,16 @@ import {
   Query,
   HttpException,
   HttpStatus,
-  UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { RegisterUserDto } from './dto/register-user.dto';
 import { LoginUserDto } from './dto/login-user-dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { RequiredLogin } from 'src/decorator';
+import { UserInfoVo } from './vo/user-info.vo';
+import { UpdatePasswordDto } from './dto/update-password.dot';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('user')
 export class UserController {
@@ -103,6 +106,53 @@ export class UserController {
       },
     );
     return vo;
+  }
+
+  // 获取用户信息
+  @Get('info')
+  @RequiredLogin()
+  async info(@Query('userId') userId: number) {
+    const userInfo = await this.userService.findInfoById(userId);
+
+    const vo = new UserInfoVo();
+    vo.id = userInfo?.id as number;
+    vo.username = userInfo?.username as string;
+    vo.avatar = userInfo?.avatar as string;
+    vo.email = userInfo?.email as string;
+    vo.phoneNumber = userInfo?.phoneNumber as string;
+    vo.isFrozen = userInfo?.isFrozen as boolean;
+    vo.isAdmin = userInfo?.isAdmin as boolean;
+    vo.createTime = userInfo?.createDate as Date;
+    vo.updateTime = userInfo?.updateDate as Date;
+
+    return vo;
+  }
+
+  // 修改密码
+  @Post(['update_password', 'admin/update_password'])
+  @RequiredLogin()
+  async updatePassword(
+    @Query('userId') userId: number,
+    @Body() passwordDto: UpdatePasswordDto,
+  ) {
+    if (passwordDto.password !== passwordDto.repassword) {
+      throw new HttpException(
+        '两次密码输入不一致,请重新输入!',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    return this.userService.updatePassword(userId, passwordDto);
+  }
+
+  // 更新个人信息
+  @Post(['update', 'admin_update'])
+  @RequiredLogin()
+  async update(
+    @Query('userId') userId: number,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return await this.userService.updateUser(userId, updateUserDto);
   }
 
   // 用户端刷新token
