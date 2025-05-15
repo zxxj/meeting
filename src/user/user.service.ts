@@ -15,7 +15,7 @@ import { Role } from './entities/role.entity';
 import { Permission } from './entities/permission.entity';
 import { LoginUserDto } from './dto/login-user-dto';
 import { LoginUserVo } from './vo/login-user.vo';
-import { UpdatePasswordDto } from './dto/update-password.dot';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
