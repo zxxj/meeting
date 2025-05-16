@@ -15,7 +15,7 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { RequiredLogin } from 'src/decorator';
 import { UserInfoVo } from './vo/user-info.vo';
-import { UpdatePasswordDto } from './dto/update-password.dot';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Controller('user')

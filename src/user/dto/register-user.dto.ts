@@ -28,7 +28,7 @@ export class RegisterUserDto {
   email: string;
 
   @IsNotEmpty({
-    message: '邮箱不能为空!',
+    message: '验证码不能为空!',
   })
   captcha: string;
 }

@@ -15,7 +15,7 @@ import { Role } from './entities/role.entity';
 import { Permission } from './entities/permission.entity';
 import { LoginUserDto } from './dto/login-user-dto';
 import { LoginUserVo } from './vo/login-user.vo';
-import { UpdatePasswordDto } from './dto/update-password.dot';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
@@ -36,17 +36,19 @@ export class UserService {
 
   // 注册
   async register(user: RegisterUserDto) {
-    // 邮箱验证码逻辑后期再完善
-    // const captcha = await this.redisService.get(`captcha_${user.email}`);
-    // console.log(captcha);
+    // 从reids中根据传入的邮箱查询对应的验证码
+    const captcha = await this.redisService.get(`captcha_${user.email}`);
+    console.log(captcha);
 
-    // if (!captcha) {
-    //   throw new HttpException('验证码已失效', HttpStatus.BAD_REQUEST);
-    // }
+    // 如果当前注册邮箱对应的验证码不存在则抛出异常
+    if (!captcha) {
+      throw new HttpException('验证码已失效', HttpStatus.BAD_REQUEST);
+    }
 
-    // if (user.captcha !== captcha) {
-    //   throw new HttpException('验证码不正确', HttpStatus.BAD_REQUEST);
-    // }
+    // 传入的验证码与redis中的验证码不一致则抛出异常
+    if (user.captcha !== captcha) {
+      throw new HttpException('验证码不正确', HttpStatus.BAD_REQUEST);
+    }
 
     // 根据注册的用户名现在数据库中查一遍,看是否有相同的用户名,如果存在则注册失败
     const foundUser = await this.userRepository.findOneBy({

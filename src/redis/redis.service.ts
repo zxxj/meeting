@@ -10,6 +10,7 @@ export class RedisService {
     return await this.redisClient.get(key);
   }
 
+  // ttl: 过期时间
   async set(key: string, value: string | number, ttl?: number) {
     await this.redisClient.set(key, value);
 
