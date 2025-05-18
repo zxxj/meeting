@@ -17,6 +17,8 @@ import { RequiredLogin } from 'src/decorator';
 import { UserInfoVo } from './vo/user-info.vo';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { EmailService } from 'src/email/email.service';
+import { RedisService } from 'src/redis/redis.service';
 
 @Controller('user')
 export class UserController {
@@ -28,10 +30,31 @@ export class UserController {
   @Inject(ConfigService)
   private configService: ConfigService;
 
+  @Inject(EmailService)
+  private emailService: EmailService;
+
+  @Inject(RedisService)
+  private redisService: RedisService;
+
   // 注册
   @Post('register')
   register(@Body() registerBody: RegisterUserDto) {
     return this.userService.register(registerBody);
+  }
+
+  // 验证码
+  @Get('register-captcha')
+  async captcha(@Query('address') address: string) {
+    const code = Math.random().toString().slice(2, 8);
+    await this.redisService.set(`captcha_${address}`, code, 5 * 60);
+
+    await this.emailService.sendEmail({
+      to: address,
+      subject: '注册验证码',
+      html: `<p>您的注册验证码是${code}</p>`,
+    });
+
+    return '注册验证码发送成功!';
   }
 
   // 用户端登录
