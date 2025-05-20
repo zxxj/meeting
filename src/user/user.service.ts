@@ -20,11 +20,13 @@ import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
+  // 创建Logger对象
   private logger = new Logger();
 
   @Inject(RedisService)
   private redisService: RedisService;
 
+  // 注入Repository<User>,这里注入Repository需要在UserModule里引入下Typeorm.forFeature
   @InjectRepository(User)
   private userRepository: Repository<User>;
 
@@ -76,7 +78,7 @@ export class UserService {
 
   // 登录
   async login(loginUserDto: LoginUserDto, isAdmin: boolean) {
-    // 现根据username和isAdmins在数据库中查一下,用户名如果找不到则提示用户不存在,isAdmin是代表查找user表中的isAdmin,false代表用户端,true代表管理端
+    // 先根据username和isAdmins在数据库中查一下,用户名如果找不到则提示用户不存在,isAdmin是代表查找user表中的isAdmin,false代表用户端,true代表管理端
     const user = await this.userRepository.findOne({
       where: {
         username: loginUserDto.username,
