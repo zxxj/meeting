@@ -163,49 +163,70 @@ export class UserService {
 
   // 修改密码
   async updatePassword(userId: number, passwordDto: UpdatePasswordDto) {
-    const user: any = await this.userRepository.findOneBy({
+    // 先拿邮箱查询redis中是否存在验证码并给出对应提示
+    const captcha = await this.redisService.get(
+      `update_password_captcha_${passwordDto.email}`,
+    );
+
+    if (!captcha) {
+      throw new HttpException('验证码已失效!', HttpStatus.BAD_REQUEST);
+    }
+
+    if (passwordDto.captcha !== captcha) {
+      throw new HttpException('验证码不正确!', HttpStatus.BAD_REQUEST);
+    }
+
+    const foundUser = (await this.userRepository.findOneBy({
       id: userId,
-    });
+    })) as User;
 
-    console.log(user);
-    user.password = md5(passwordDto.password);
+    foundUser.password = md5(passwordDto.password);
 
-    console.log(user.password);
-
-    console.log(user);
     try {
-      await this.userRepository.save(user);
+      await this.userRepository.save(foundUser);
       return '密码修改成功!';
     } catch (error) {
-      throw new HttpException('密码修改失败!', HttpStatus.BAD_REQUEST);
+      this.logger.error(error);
+      return '密码修改失败!';
     }
   }
 
   // 更新用户信息
   async updateUser(userId: number, updateUserDto: UpdateUserDto) {
-    console.log(userId);
-    const user: any = await this.userRepository.findOneBy({
+    const captcha = await this.redisService.get(
+      `update_user_captcha_${updateUserDto.email}`,
+    );
+
+    if (!captcha) {
+      throw new HttpException('验证码已失效!', HttpStatus.BAD_REQUEST);
+    }
+
+    if (captcha !== updateUserDto.captcha) {
+      throw new HttpException('验证码不正确!', HttpStatus.BAD_REQUEST);
+    }
+
+    const foundUser = (await this.userRepository.findOneBy({
       id: userId,
-    });
+    })) as User;
 
     if (updateUserDto.avatar) {
-      user.avatar = updateUserDto.avatar;
+      foundUser.avatar = updateUserDto.avatar;
     }
 
     if (updateUserDto.nickName) {
-      user.nickName = updateUserDto.nickName;
+      foundUser.nickName = updateUserDto.nickName;
     }
 
     if (updateUserDto.phoneNumber) {
-      user.phoneNumber = updateUserDto.phoneNumber;
+      foundUser.phoneNumber = updateUserDto.phoneNumber;
     }
 
     if (updateUserDto.username) {
-      user.username = updateUserDto.username;
+      foundUser.username = updateUserDto.username;
     }
 
     try {
-      this.userRepository.save(user);
+      this.userRepository.save(foundUser);
       return '用户信息修改成功!';
     } catch (error) {
       this.logger.debug(error, UserService);

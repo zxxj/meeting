@@ -1,4 +1,4 @@
-import { IsNotEmpty, MaxLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, MaxLength } from 'class-validator';
 
 export class UpdateUserDto {
   @IsNotEmpty({
@@ -17,4 +17,20 @@ export class UpdateUserDto {
     message: '手机号长度为11位!',
   })
   phoneNumber: string;
+
+  @IsNotEmpty({
+    message: '邮箱不能为空!',
+  })
+  @IsEmail(
+    {},
+    {
+      message: '不是合法的邮箱格式!',
+    },
+  )
+  email: string;
+
+  @IsNotEmpty({
+    message: '验证码不能为空!',
+  })
+  captcha: string;
 }

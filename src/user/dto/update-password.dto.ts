@@ -1,4 +1,4 @@
-import { IsNotEmpty, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, MinLength } from 'class-validator';
 
 export class UpdatePasswordDto {
   @IsNotEmpty({
@@ -10,10 +10,18 @@ export class UpdatePasswordDto {
   password: string;
 
   @IsNotEmpty({
-    message: '确认密码不能为空!',
+    message: '邮箱不能为空!',
   })
-  @MinLength(6, {
-    message: '确认密码长度不能小于6位!',
+  @IsEmail(
+    {},
+    {
+      message: '不是合法的邮箱格式!',
+    },
+  )
+  email: string;
+
+  @IsNotEmpty({
+    message: '验证码不能为空!',
   })
-  repassword: string;
+  captcha: string;
 }

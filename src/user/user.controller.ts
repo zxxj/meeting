@@ -13,7 +13,7 @@ import { RegisterUserDto } from './dto/register-user.dto';
 import { LoginUserDto } from './dto/login-user-dto';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import { RequiredLogin } from 'src/decorator';
+import { RequiredLogin, UserInfo } from 'src/decorator';
 import { UserInfoVo } from './vo/user-info.vo';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -55,6 +55,40 @@ export class UserController {
     });
 
     return '注册验证码发送成功!';
+  }
+
+  // 修改密码: 验证码
+  @Get('password/captcha')
+  async updatePasswordCaptcha(@Query('address') address: string) {
+    const code = Math.random().toString().slice(2, 8);
+    await this.redisService.set(
+      `update_password_captcha_${address}`,
+      code,
+      5 * 60,
+    );
+
+    await this.emailService.sendEmail({
+      to: address,
+      subject: '会议室系统更改密码验证码',
+      html: `<p>您的更改密码验证码是${code}</p>`,
+    });
+
+    return '会议室系统更改密码验证码发送成功!';
+  }
+
+  // 修改用户信息: 验证码
+  @Get('update/captcha')
+  async updateUserCaptcha(@Query('address') address: string) {
+    const code = Math.random().toString().slice(2, 8);
+    await this.redisService.set(`update_user_captcha_${address}`, code, 5 * 60);
+
+    await this.emailService.sendEmail({
+      to: address,
+      subject: '会议室系统更新用户信息验证码',
+      html: `<p>您的更新用户信息验证码是${code}</p>`,
+    });
+
+    return '会议室系统更新用户信息验证码发送成功!';
   }
 
   // 用户端登录
@@ -134,7 +168,7 @@ export class UserController {
   // 获取用户信息
   @Get('info')
   @RequiredLogin()
-  async info(@Query('userId') userId: number) {
+  async info(@UserInfo('userId') userId: number) {
     const userInfo = await this.userService.findInfoById(userId);
 
     const vo = new UserInfoVo();
@@ -155,24 +189,21 @@ export class UserController {
   @Post(['update_password', 'admin/update_password'])
   @RequiredLogin()
   async updatePassword(
-    @Query('userId') userId: number,
+    @UserInfo('userId') userId: number,
     @Body() passwordDto: UpdatePasswordDto,
   ) {
-    if (passwordDto.password !== passwordDto.repassword) {
-      throw new HttpException(
-        '两次密码输入不一致,请重新输入!',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    console.log(
+      `console.log: userId:${userId}, passwordDto:${JSON.stringify(passwordDto)}`,
+    );
 
     return this.userService.updatePassword(userId, passwordDto);
   }
 
   // 更新个人信息
-  @Post(['update', 'admin_update'])
+  @Post(['update', 'admin/update'])
   @RequiredLogin()
   async update(
-    @Query('userId') userId: number,
+    @UserInfo('userId') userId: number,
     @Body() updateUserDto: UpdateUserDto,
   ) {
     return await this.userService.updateUser(userId, updateUserDto);
