@@ -7,6 +7,9 @@ import {
   Query,
   HttpException,
   HttpStatus,
+  ParseIntPipe,
+  BadRequestException,
+  DefaultValuePipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { RegisterUserDto } from './dto/register-user.dto';
@@ -19,6 +22,7 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { EmailService } from 'src/email/email.service';
 import { RedisService } from 'src/redis/redis.service';
+import { generateParseIntPipe } from 'src/utils/generateParseIntPipe';
 
 @Controller('user')
 export class UserController {
@@ -290,5 +294,36 @@ export class UserController {
   async initData() {
     await this.userService.initData();
     return 'done';
+  }
+
+  // 冻结用户
+  @Get('freeze')
+  async freeze(@Query('id') id: number) {
+    return this.userService.freezeById(id);
+  }
+
+  // 查询列表
+  @Get('list')
+  async list(
+    @Query('pageNum', new DefaultValuePipe(1), generateParseIntPipe('pageNum'))
+    pageNum: number,
+    @Query(
+      'pageSize',
+      new DefaultValuePipe(2),
+      generateParseIntPipe('pageSize'),
+    )
+    pageSize: number,
+
+    @Query('username') username: string,
+    @Query('nickname') nickname: string,
+    @Query('email') email: string,
+  ) {
+    return this.userService.findUserByPage(
+      pageNum,
+      pageSize,
+      username,
+      nickname,
+      email,
+    );
   }
 }
