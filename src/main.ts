@@ -6,6 +6,7 @@ import { FormatResponseInterceptor } from './interceptor/format-response.interce
 import { InvokeRecordInterceptor } from './interceptor/invoke-record.interceptor';
 import { UnloginFilter } from './filter/unlogin.filter';
 import { CustomExceptionFilter } from './filter/custom-exception.filter';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -17,6 +18,19 @@ async function bootstrap() {
   app.useGlobalFilters(new CustomExceptionFilter());
 
   const configService = app.get(ConfigService);
+
+  // swagger
+  const config = new DocumentBuilder()
+    .setTitle('会议室预定系统')
+    .setDescription('api接口文档')
+    .setVersion('1.0')
+    .addBearerAuth({
+      type: 'http',
+      description: '基于jwt的认证',
+    })
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('swagger-ui', app, document);
 
   await app.listen(configService.get('nest_server_port') as number);
 }
