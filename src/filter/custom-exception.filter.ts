@@ -12,13 +12,14 @@ export class CustomExceptionFilter implements ExceptionFilter {
     const response = host.switchToHttp().getResponse<Response>();
 
     // 解决某些接口验证参数时接口返回信息不全的问题
-    const res = exception.getResponse() as { message: String[] };
-
+    const res = exception.getResponse() as { message: string[] };
+    console.log('res res', res);
     response
       .json({
         code: exception.getStatus(),
         message: 'fail',
-        data: res?.message?.join(',') || exception.message,
+        // data: res?.message?.join(',') || exception.message,
+        data: res?.message || exception.message,
       })
       .end();
   }
