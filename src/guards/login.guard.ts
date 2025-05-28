@@ -16,6 +16,7 @@ interface JwtUserData {
   userId: number;
   username: string;
   roles: string[];
+  email: string;
   permission: Permission[];
 }
 
@@ -55,9 +56,12 @@ export class LoginGuard implements CanActivate {
       request.user = {
         userId: data.userId,
         username: data.username,
+        email: data.email,
         roles: data.roles,
         permission: data.permission,
       };
+
+      console.log('loginGuard!!!', request.user);
       return true;
     } catch (error) {
       console.log(error);

@@ -12,6 +12,7 @@ import { Request } from 'express';
 interface JwtUserData {
   userId: number;
   username: string;
+  email: string;
   roles: string[];
   permission: Permission[];
 }

@@ -79,6 +79,8 @@ export class UserService {
 
   // 登录
   async login(loginUserDto: LoginUserDto, isAdmin: boolean) {
+    console.log('aaasasa', loginUserDto);
+
     // 先根据username和isAdmins在数据库中查一下,用户名如果找不到则提示用户不存在,isAdmin是代表查找user表中的isAdmin,false代表用户端,true代表管理端
     const user = await this.userRepository.findOne({
       where: {
@@ -87,6 +89,8 @@ export class UserService {
       },
       relations: ['roles', 'roles.permissions'],
     });
+
+    console.log('bb', loginUserDto);
 
     if (!user) {
       throw new HttpException('用户不存在!', HttpStatus.BAD_REQUEST);
@@ -136,6 +140,7 @@ export class UserService {
       id: user?.id,
       username: user?.username,
       nickname: user?.nickName,
+      email: user?.email,
       isAdmin: user?.isAdmin,
       roles: user?.roles.map((item) => item.name),
       permissions: user?.roles.reduce<any[]>((arr, item) => {
@@ -163,7 +168,7 @@ export class UserService {
   }
 
   // 修改密码
-  async updatePassword(userId: number, passwordDto: UpdatePasswordDto) {
+  async updatePassword(passwordDto: UpdatePasswordDto) {
     // 先拿邮箱查询redis中是否存在验证码并给出对应提示
     const captcha = await this.redisService.get(
       `update_password_captcha_${passwordDto.email}`,
@@ -178,8 +183,19 @@ export class UserService {
     }
 
     const foundUser = (await this.userRepository.findOneBy({
-      id: userId,
+      username: passwordDto.username,
     })) as User;
+
+    if (!foundUser) {
+      throw new HttpException(
+        '用户名输入有误,查无此人!',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    if (foundUser.email !== passwordDto.email) {
+      throw new HttpException('邮箱不正确!!', HttpStatus.BAD_REQUEST);
+    }
 
     foundUser.password = md5(passwordDto.password);
 
