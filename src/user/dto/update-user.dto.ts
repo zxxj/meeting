@@ -12,7 +12,7 @@ export class UpdateUserDto {
   avatar: string;
 
   @ApiProperty()
-  nickName: string;
+  nickname: string;
 
   @ApiProperty()
   @IsNotEmpty({

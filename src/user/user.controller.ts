@@ -111,17 +111,20 @@ export class UserController {
     type: String,
     description: '发送成功',
   })
-  @Get('password-captcha')
-  async updatePasswordCaptcha(@Query('address') address: string) {
+  @RequiredLogin()
+  @Get(['password-captcha', 'admin/password-captcha'])
+  async updatePasswordCaptcha(@UserInfo('email') email: string) {
+    console.log('email!!!', email);
+
     const code = Math.random().toString().slice(2, 8);
     await this.redisService.set(
-      `update_password_captcha_${address}`,
+      `update_password_captcha_${email}`,
       code,
       5 * 60,
     );
 
     await this.emailService.sendEmail({
-      to: address,
+      to: email,
       subject: '会议室系统更改密码验证码',
       html: `<p>您的更改密码验证码是${code}</p>`,
     });
@@ -130,7 +133,7 @@ export class UserController {
   }
 
   // 修改用户信息: 验证码
-  @Get('update-captcha')
+  @Get(['update-captcha', 'admin/update-captcha'])
   @RequiredLogin()
   async updateUserCaptcha(@UserInfo('email') email: string) {
     console.log('email!!!', email);
@@ -257,7 +260,7 @@ export class UserController {
     description: 'success',
     type: UserInfoVo,
   })
-  @Get('info')
+  @Get(['info', 'admin/info'])
   @RequiredLogin()
   async info(@UserInfo('userId') userId: number) {
     const userInfo = await this.userService.findInfoById(userId);
@@ -265,7 +268,7 @@ export class UserController {
     const vo = new UserInfoVo();
     vo.id = userInfo?.id as number;
     vo.username = userInfo?.username as string;
-    vo.nickname = userInfo?.nickName as string;
+    vo.nickname = userInfo?.nickname as string;
     vo.avatar = userInfo?.avatar as string;
     vo.email = userInfo?.email as string;
     vo.phoneNumber = userInfo?.phoneNumber as string;
@@ -446,7 +449,7 @@ export class UserController {
     description: 'success',
   })
   @RequiredLogin()
-  @Get('freeze')
+  @Get('admin/freeze')
   async freeze(@Query('id') id: number) {
     return this.userService.freezeById(id);
   }
@@ -469,7 +472,7 @@ export class UserController {
     type: Number,
   })
   @ApiQuery({
-    name: 'nickName',
+    name: 'nickname',
     description: '昵称',
     type: Number,
   })
@@ -483,7 +486,7 @@ export class UserController {
     description: '用户列表',
   })
   @RequiredLogin()
-  @Get('list')
+  @Get(['list', 'admin/list'])
   async list(
     @Query('pageNum', new DefaultValuePipe(1), generateParseIntPipe('pageNum'))
     pageNum: number,

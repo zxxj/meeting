@@ -8,7 +8,7 @@ class User {
   username: string;
 
   @ApiProperty()
-  nickName: string;
+  nickname: string;
 
   @ApiProperty()
   email: string;

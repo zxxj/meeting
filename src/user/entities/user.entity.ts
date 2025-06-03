@@ -36,7 +36,7 @@ export class User {
     length: 50,
     comment: '昵称',
   })
-  nickName: string;
+  nickname: string;
 
   @IsNotEmpty()
   @Length(1, 50)

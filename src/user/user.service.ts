@@ -65,7 +65,7 @@ export class UserService {
     // 创建新用户
     const newUser = new User();
     newUser.username = user.username;
-    newUser.nickName = user.nickname;
+    newUser.nickname = user.nickname;
     newUser.password = md5(user.password);
     newUser.email = user.email;
 
@@ -105,7 +105,7 @@ export class UserService {
     vo.userInfo = {
       id: user.id,
       username: user.username,
-      nickname: user.nickName,
+      nickname: user.nickname,
       email: user.email,
       phoneNumber: user.phoneNumber,
       avatar: user.avatar,
@@ -139,7 +139,7 @@ export class UserService {
     const vo = {
       id: user?.id,
       username: user?.username,
-      nickname: user?.nickName,
+      nickname: user?.nickname,
       email: user?.email,
       isAdmin: user?.isAdmin,
       roles: user?.roles.map((item) => item.name),
@@ -230,8 +230,8 @@ export class UserService {
       foundUser.avatar = updateUserDto.avatar;
     }
 
-    if (updateUserDto.nickName) {
-      foundUser.nickName = updateUserDto.nickName;
+    if (updateUserDto.nickname) {
+      foundUser.nickname = updateUserDto.nickname;
     }
 
     if (updateUserDto.phoneNumber) {
@@ -258,14 +258,14 @@ export class UserService {
     user1.password = md5('123456');
     user1.email = '1285367184@qq.com';
     user1.isAdmin = true;
-    user1.nickName = '张鑫鑫';
+    user1.nickname = '张鑫鑫';
     user1.phoneNumber = '17775979964';
 
     const user2 = new User();
     user2.username = 'lisi';
     user2.password = md5('2222222');
     user2.email = '555555@qq.com';
-    user2.nickName = '李四';
+    user2.nickname = '李四';
     user2.phoneNumber = '12222222222';
 
     const role1 = new Role();
@@ -348,7 +348,7 @@ export class UserService {
         'id',
         'isAdmin',
         'isFrozen',
-        'nickName',
+        'nickname',
         'phoneNumber',
         'roles',
         'updateDate',
