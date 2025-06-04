@@ -69,7 +69,9 @@ export class MeetingRoomService {
       throw new BadRequestException('会议室名字已存在!');
     }
 
-    return await this.repository.save(meetingRoomDto);
+    await this.repository.save(meetingRoomDto);
+
+    return '会议室创建成功!';
   }
 
   async update(meetingRoomDto: UpdateMeetingRoomDto) {
